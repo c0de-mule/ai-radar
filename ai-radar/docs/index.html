@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Radar — Daily AI Intelligence</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">🛰️</span>
+        <h1 class="brand-name">AI Radar</h1>
+      </div>
+      <nav class="date-nav">
+        <button id="prev-day" class="nav-btn" title="Previous day">←</button>
+        <span id="current-date" class="date-display">Loading...</span>
+        <button id="next-day" class="nav-btn" title="Next day">→</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main">
+    <!-- Headline banner -->
+    <section id="headline-banner" class="headline-banner">
+      <div class="headline-label">TOP STORY</div>
+      <h2 id="headline-text" class="headline-text">Loading today's briefing...</h2>
+      <div id="headline-stats" class="headline-stats"></div>
+    </section>
+
+    <!-- Category filters -->
+    <nav id="category-filters" class="category-filters">
+      <button class="filter-btn active" data-category="all">All</button>
+      <button class="filter-btn" data-category="models">🧠 Models</button>
+      <button class="filter-btn" data-category="tools">🛠️ Tools</button>
+      <button class="filter-btn" data-category="research">📄 Research</button>
+      <button class="filter-btn" data-category="industry">📰 Industry</button>
+      <button class="filter-btn" data-category="tutorials">📚 Tutorials</button>
+    </nav>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input id="search-input" type="text" placeholder="Filter today's briefing..." class="search-input">
+    </div>
+
+    <!-- Cards grid -->
+    <div id="cards-grid" class="cards-grid">
+      <!-- Skeleton loaders shown on initial load -->
+      <div class="card skeleton"><div class="skeleton-line w80"></div><div class="skeleton-line w100"></div><div class="skeleton-line w60"></div></div>
+      <div class="card skeleton"><div class="skeleton-line w80"></div><div class="skeleton-line w100"></div><div class="skeleton-line w60"></div></div>
+      <div class="card skeleton"><div class="skeleton-line w80"></div><div class="skeleton-line w100"></div><div class="skeleton-line w60"></div></div>
+      <div class="card skeleton"><div class="skeleton-line w80"></div><div class="skeleton-line w100"></div><div class="skeleton-line w60"></div></div>
+      <div class="card skeleton"><div class="skeleton-line w80"></div><div class="skeleton-line w100"></div><div class="skeleton-line w60"></div></div>
+      <div class="card skeleton"><div class="skeleton-line w80"></div><div class="skeleton-line w100"></div><div class="skeleton-line w60"></div></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="empty-state hidden">
+      <p>No items match your filter.</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Auto-curated daily by AI Radar · Powered by Gemini + open data · <a href="https://github.com/everettcento/ai-radar" class="footer-link">GitHub</a></p>
+  </footer>
+
+  <script src="js/components.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
