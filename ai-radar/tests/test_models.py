@@ -1,7 +1,5 @@
 """Tests for data models."""
 
-from datetime import datetime, timezone
-
 import pytest
 from pydantic import ValidationError
 

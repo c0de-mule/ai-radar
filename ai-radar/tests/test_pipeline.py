@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, patch, MagicMock
+from datetime import UTC, datetime
 
 import pytest
 
 from pipeline.config import Settings
 from pipeline.models import (
-    BriefingItem,
     Category,
     DailyBriefing,
-    RawItem,
     Source,
 )
 
@@ -23,9 +20,9 @@ class TestPipelineIntegration:
     @pytest.mark.asyncio
     async def test_full_pipeline_flow(self, tmp_path, sample_raw_items):
         """Test the complete pipeline from fetch to output."""
+        from pipeline.output.json_writer import write_briefing
         from pipeline.processing.dedup import deduplicate
         from pipeline.processing.relevance import score_relevance
-        from pipeline.output.json_writer import write_briefing
 
         # 1. Deduplicate
         deduped = deduplicate(sample_raw_items)
@@ -38,7 +35,10 @@ class TestPipelineIntegration:
         assert deduped[0].relevance_score > 0
 
         # 3. Mock AI summarization (just use extractive fallback)
-        from pipeline.processing.ai_summarizer import _extractive_fallback, _apply_ai_result, _parse_category
+        from pipeline.processing.ai_summarizer import (
+            _apply_ai_result,
+            _extractive_fallback,
+        )
 
         briefing_items = []
         for item in deduped:
@@ -53,13 +53,19 @@ class TestPipelineIntegration:
 
         stats = BriefingStats(
             total_items=len(briefing_items),
-            sources={s.value: sum(1 for i in briefing_items if i.source == s) for s in Source},
-            categories={c.value: sum(1 for i in briefing_items if i.category == c) for c in Category},
+            sources={
+                s.value: sum(1 for i in briefing_items if i.source == s)
+                for s in Source
+            },
+            categories={
+                c.value: sum(1 for i in briefing_items if i.category == c)
+                for c in Category
+            },
         )
 
         briefing = DailyBriefing(
             date="2025-02-10",
-            generated_at=datetime.now(tz=timezone.utc),
+            generated_at=datetime.now(tz=UTC),
             headline=briefing_items[0].title,
             stats=stats,
             items=briefing_items,

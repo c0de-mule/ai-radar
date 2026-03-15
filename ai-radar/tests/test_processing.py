@@ -1,10 +1,15 @@
 """Tests for the processing pipeline — dedup, relevance, AI summarizer."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
 from pipeline.models import Category, RawItem, Source
+from pipeline.processing.ai_summarizer import (
+    _build_user_prompt,
+    _extractive_fallback,
+    _parse_category,
+)
 from pipeline.processing.dedup import (
     _normalize_url,
     _title_similarity,
@@ -17,11 +22,6 @@ from pipeline.processing.relevance import (
     _source_authority_score,
     score_relevance,
 )
-from pipeline.processing.ai_summarizer import (
-    _build_user_prompt,
-    _extractive_fallback,
-    _parse_category,
-)
 
 
 class TestDedup:
@@ -29,8 +29,14 @@ class TestDedup:
 
     def test_exact_url_dedup(self):
         items = [
-            RawItem(id="a", title="Story A", url="https://example.com/story", source=Source.HACKERNEWS, score=100),
-            RawItem(id="b", title="Story B", url="https://example.com/story", source=Source.RSS, score=50),
+            RawItem(
+                id="a", title="Story A", url="https://example.com/story",
+                source=Source.HACKERNEWS, score=100,
+            ),
+            RawItem(
+                id="b", title="Story B", url="https://example.com/story",
+                source=Source.RSS, score=50,
+            ),
         ]
         result = deduplicate(items)
         assert len(result) == 1
@@ -64,8 +70,14 @@ class TestDedup:
 
     def test_title_dedup_keeps_better(self):
         items = [
-            RawItem(id="a", title="AI model achieves breakthrough results", url="https://a.com", source=Source.RSS, score=10),
-            RawItem(id="b", title="AI model achieves breakthrough results today", url="https://b.com", source=Source.HACKERNEWS, score=500),
+            RawItem(
+                id="a", title="AI model achieves breakthrough results",
+                url="https://a.com", source=Source.RSS, score=10,
+            ),
+            RawItem(
+                id="b", title="AI model achieves breakthrough results today",
+                url="https://b.com", source=Source.HACKERNEWS, score=500,
+            ),
         ]
         result = deduplicate(items)
         assert len(result) == 1
@@ -81,7 +93,10 @@ class TestRelevance:
             assert 0.0 <= scored.relevance_score <= 10.0
 
     def test_keyword_density(self):
-        item = RawItem(id="t", title="AI LLM transformer deep learning", url="http://x.com", source=Source.RSS)
+        item = RawItem(
+            id="t", title="AI LLM transformer deep learning",
+            url="http://x.com", source=Source.RSS,
+        )
         score = _keyword_density_score(item)
         assert score > 0
 
@@ -98,7 +113,7 @@ class TestRelevance:
     def test_recency_recent(self):
         item = RawItem(
             id="t", title="t", url="http://x.com", source=Source.RSS,
-            published_at=datetime.now(tz=timezone.utc),
+            published_at=datetime.now(tz=UTC),
         )
         assert _recency_score(item) == 2.0
 
@@ -107,7 +122,10 @@ class TestRelevance:
         assert _recency_score(item) == 1.0  # Unknown = middle
 
     def test_engagement_high(self):
-        item = RawItem(id="t", title="t", url="http://x.com", source=Source.HACKERNEWS, score=1000)
+        item = RawItem(
+            id="t", title="t", url="http://x.com",
+            source=Source.HACKERNEWS, score=1000,
+        )
         assert _engagement_score(item) == 3.0
 
     def test_engagement_none(self):
@@ -123,7 +141,7 @@ class TestRelevance:
             source=Source.HACKERNEWS,
             content="GPT model with deep learning and AI capabilities",
             score=800,
-            published_at=datetime.now(tz=timezone.utc),
+            published_at=datetime.now(tz=UTC),
         )
         scored = score_relevance(item)
         assert scored.relevance_score >= 7.0

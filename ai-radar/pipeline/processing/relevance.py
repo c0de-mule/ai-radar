@@ -8,7 +8,7 @@ the daily briefing.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pipeline.config import AI_KEYWORDS
 from pipeline.models import RawItem, Source
@@ -58,7 +58,7 @@ def _recency_score(item: RawItem) -> float:
     if item.published_at is None:
         return 1.0  # Unknown age gets middle score
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     age_hours = (now - item.published_at).total_seconds() / 3600
 
     if age_hours <= 6:

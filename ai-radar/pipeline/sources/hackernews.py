@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
@@ -40,7 +40,12 @@ async def _fetch_story(client: httpx.AsyncClient, story_id: int) -> dict | None:
         resp = await client.get(f"{HN_BASE_URL}/item/{story_id}.json")
         resp.raise_for_status()
         data = resp.json()
-        if data and data.get("type") == "story" and not data.get("dead") and not data.get("deleted"):
+        if (
+            data
+            and data.get("type") == "story"
+            and not data.get("dead")
+            and not data.get("deleted")
+        ):
             return data
     except (httpx.HTTPError, ValueError) as exc:
         logger.debug("Failed to fetch HN story %d: %s", story_id, exc)
@@ -96,7 +101,7 @@ async def fetch_hackernews() -> list[RawItem]:
 
                 published = None
                 if story.get("time"):
-                    published = datetime.fromtimestamp(story["time"], tz=timezone.utc)
+                    published = datetime.fromtimestamp(story["time"], tz=UTC)
 
                 items.append(
                     RawItem(

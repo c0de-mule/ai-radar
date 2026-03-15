@@ -10,7 +10,7 @@ Rate limit: max 1 request every 3 seconds.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 
 import feedparser
 import httpx

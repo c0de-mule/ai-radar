@@ -2,22 +2,22 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+
+import httpx
 import pytest
 import respx
-import httpx
 
-from pipeline.sources.hackernews import fetch_hackernews, _matches_ai_keywords
-from pipeline.sources.arxiv import fetch_arxiv, _build_query, _parse_authors
-from pipeline.sources.rss import fetch_rss, _is_recent, _clean_html
-
+from pipeline.sources.arxiv import _build_query, fetch_arxiv
+from pipeline.sources.hackernews import _matches_ai_keywords, fetch_hackernews
+from pipeline.sources.rss import _clean_html, _is_recent, fetch_rss
 from tests.conftest import (
-    MOCK_HN_TOP_STORIES,
-    MOCK_HN_STORY,
-    MOCK_HN_NON_AI_STORY,
     MOCK_ARXIV_RESPONSE,
+    MOCK_HN_NON_AI_STORY,
+    MOCK_HN_STORY,
+    MOCK_HN_TOP_STORIES,
     MOCK_RSS_RESPONSE,
 )
-from datetime import datetime, timezone, timedelta
 
 
 class TestHackerNews:
@@ -104,11 +104,11 @@ class TestRSS:
     """Tests for the RSS fetcher."""
 
     def test_is_recent_true(self):
-        recent = datetime.now(tz=timezone.utc) - timedelta(hours=1)
+        recent = datetime.now(tz=UTC) - timedelta(hours=1)
         assert _is_recent(recent, 48)
 
     def test_is_recent_false(self):
-        old = datetime.now(tz=timezone.utc) - timedelta(hours=100)
+        old = datetime.now(tz=UTC) - timedelta(hours=100)
         assert not _is_recent(old, 48)
 
     def test_is_recent_none(self):
@@ -121,9 +121,8 @@ class TestRSS:
     @respx.mock
     @pytest.mark.asyncio
     async def test_fetch_rss(self):
-        from datetime import datetime, timezone
         # Build RSS with a recent pubDate so _is_recent passes
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         pub_date = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
         recent_rss = f"""<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">

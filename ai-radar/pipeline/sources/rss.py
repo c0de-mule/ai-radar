@@ -10,7 +10,7 @@ import asyncio
 import hashlib
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from time import mktime
 
 import feedparser
@@ -34,7 +34,7 @@ def _parse_entry_date(entry: dict) -> datetime | None:
         parsed = entry.get(date_field)
         if parsed:
             try:
-                return datetime.fromtimestamp(mktime(parsed), tz=timezone.utc)
+                return datetime.fromtimestamp(mktime(parsed), tz=UTC)
             except (ValueError, OverflowError):
                 continue
     return None
@@ -44,7 +44,7 @@ def _is_recent(published: datetime | None, max_age_hours: int) -> bool:
     """Check if an entry was published within the max age window."""
     if published is None:
         return True  # If we can't determine age, include it
-    age = datetime.now(tz=timezone.utc) - published
+    age = datetime.now(tz=UTC) - published
     return age.total_seconds() < max_age_hours * 3600
 
 

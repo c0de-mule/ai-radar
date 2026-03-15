@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
-from pipeline.output.json_writer import write_briefing, _update_index
 from pipeline.output.email_digest import _render_digest_html
+from pipeline.output.json_writer import _update_index, write_briefing
 
 
 class TestJSONWriter:

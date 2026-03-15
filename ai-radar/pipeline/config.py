@@ -52,7 +52,10 @@ RSS_FEEDS: list[dict[str, str]] = [
     {"name": "Lilian Weng", "url": "https://lilianweng.github.io/index.xml"},
     {"name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/"},
     {"name": "Latent Space", "url": "https://www.latent.space/feed"},
-    {"name": "MIT Tech Review AI", "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed"},
+    {
+        "name": "MIT Tech Review AI",
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+    },
     {"name": "The Batch (deeplearning.ai)", "url": "https://www.deeplearning.ai/the-batch/feed/"},
 ]
 

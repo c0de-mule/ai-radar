@@ -138,7 +138,9 @@ def _extractive_fallback(item: RawItem) -> dict[str, Any]:
     text_lower = f"{item.title} {item.content}".lower()
     if any(kw in text_lower for kw in ("model", "benchmark", "parameter", "weights", "fine-tun")):
         category = "models"
-    elif any(kw in text_lower for kw in ("library", "framework", "sdk", "tool", "release", "api")):
+    elif any(
+        kw in text_lower for kw in ("library", "framework", "sdk", "tool", "release", "api")
+    ):
         category = "tools"
     elif any(kw in text_lower for kw in ("paper", "arxiv", "theorem", "proof", "novel")):
         category = "research"

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -61,8 +60,8 @@ class RawItem(BaseModel):
         description="Raw content: article body, abstract, or description",
     )
     authors: list[str] = Field(default_factory=list)
-    published_at: Optional[datetime] = None
-    score: Optional[int] = Field(
+    published_at: datetime | None = None
+    score: int | None = Field(
         default=None,
         description="Engagement metric from source (HN points, etc.)",
     )
@@ -89,7 +88,7 @@ class BriefingItem(BaseModel):
     summary: str = Field(description="AI-generated 2-3 sentence summary")
     relevance_score: float = Field(ge=0.0, le=10.0)
     tags: list[str] = Field(default_factory=list)
-    published_at: Optional[datetime] = None
+    published_at: datetime | None = None
 
 
 class BriefingStats(BaseModel):

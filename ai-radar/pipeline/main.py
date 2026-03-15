@@ -18,7 +18,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from pipeline.config import (
@@ -26,7 +26,7 @@ from pipeline.config import (
     MAX_ITEMS_TO_SUMMARIZE,
     load_settings,
 )
-from pipeline.models import BriefingStats, DailyBriefing
+from pipeline.models import BriefingItem, BriefingStats, DailyBriefing, RawItem
 from pipeline.output.email_digest import send_digest
 from pipeline.output.json_writer import write_briefing
 from pipeline.processing.ai_summarizer import summarize_batch
@@ -48,7 +48,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def fetch_all_sources():
+async def fetch_all_sources() -> list[RawItem]:
     """Fetch items from all sources concurrently.
 
     Returns:
@@ -63,10 +63,10 @@ async def fetch_all_sources():
         return_exceptions=True,
     )
 
-    all_items = []
+    all_items: list[RawItem] = []
     source_names = ["Hacker News", "arXiv", "RSS"]
 
-    for name, result in zip(source_names, results):
+    for name, result in zip(source_names, results, strict=False):
         if isinstance(result, Exception):
             logger.error("Failed to fetch from %s: %s", name, result)
         else:
@@ -77,7 +77,7 @@ async def fetch_all_sources():
     return all_items
 
 
-def _compute_stats(items) -> BriefingStats:
+def _compute_stats(items: list[BriefingItem]) -> BriefingStats:
     """Compute aggregate stats for the briefing."""
     sources: dict[str, int] = {}
     categories: dict[str, int] = {}
@@ -98,7 +98,7 @@ async def run_pipeline() -> DailyBriefing:
         The assembled DailyBriefing, also written to disk.
     """
     settings = load_settings()
-    today = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
     logger.info("=" * 60)
     logger.info("AI Radar — generating briefing for %s", today)
@@ -119,7 +119,11 @@ async def run_pipeline() -> DailyBriefing:
     for item in unique_items:
         score_relevance(item)
     unique_items.sort(key=lambda x: x.relevance_score, reverse=True)
-    logger.info("Top relevance score: %.1f (%s)", unique_items[0].relevance_score, unique_items[0].title[:60])
+    logger.info(
+        "Top relevance score: %.1f (%s)",
+        unique_items[0].relevance_score,
+        unique_items[0].title[:60],
+    )
 
     # 4. Take top N and summarize with AI
     top_items = unique_items[:MAX_ITEMS_TO_SUMMARIZE]
@@ -133,7 +137,7 @@ async def run_pipeline() -> DailyBriefing:
     headline = briefing_items[0].title if briefing_items else "No items today"
     briefing = DailyBriefing(
         date=today,
-        generated_at=datetime.now(tz=timezone.utc),
+        generated_at=datetime.now(tz=UTC),
         headline=headline,
         stats=_compute_stats(briefing_items),
         items=briefing_items,

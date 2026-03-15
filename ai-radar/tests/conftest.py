@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -27,7 +27,7 @@ def sample_raw_items() -> list[RawItem]:
             source=Source.HACKERNEWS,
             source_detail="Hacker News (850 pts)",
             content="OpenAI has released GPT-5, their latest model.",
-            published_at=datetime(2025, 2, 10, 8, 0, tzinfo=timezone.utc),
+            published_at=datetime(2025, 2, 10, 8, 0, tzinfo=UTC),
             score=850,
         ),
         RawItem(
@@ -38,7 +38,7 @@ def sample_raw_items() -> list[RawItem]:
             source_detail="arXiv (Smith, Jones)",
             content="We propose a new attention mechanism that reduces computational complexity.",
             authors=["Smith", "Jones"],
-            published_at=datetime(2025, 2, 10, 6, 0, tzinfo=timezone.utc),
+            published_at=datetime(2025, 2, 10, 6, 0, tzinfo=UTC),
         ),
         RawItem(
             id="rss-abcdef01",
@@ -47,7 +47,7 @@ def sample_raw_items() -> list[RawItem]:
             source=Source.RSS,
             source_detail="LangChain Blog",
             content="A comprehensive guide to building AI applications with LangChain v2.",
-            published_at=datetime(2025, 2, 9, 14, 0, tzinfo=timezone.utc),
+            published_at=datetime(2025, 2, 9, 14, 0, tzinfo=UTC),
         ),
         RawItem(
             id="hn-12346",
@@ -56,7 +56,7 @@ def sample_raw_items() -> list[RawItem]:
             source=Source.HACKERNEWS,
             source_detail="Hacker News (420 pts)",
             content="",
-            published_at=datetime(2025, 2, 10, 10, 0, tzinfo=timezone.utc),
+            published_at=datetime(2025, 2, 10, 10, 0, tzinfo=UTC),
             score=420,
         ),
         RawItem(
@@ -66,7 +66,7 @@ def sample_raw_items() -> list[RawItem]:
             source=Source.RSS,
             source_detail="Anthropic Blog",
             content="Anthropic has raised $5 billion in a new funding round.",
-            published_at=datetime(2025, 2, 10, 12, 0, tzinfo=timezone.utc),
+            published_at=datetime(2025, 2, 10, 12, 0, tzinfo=UTC),
         ),
     ]
 
@@ -82,10 +82,13 @@ def sample_briefing_items() -> list[BriefingItem]:
             source=Source.HACKERNEWS,
             source_detail="Hacker News (850 pts)",
             category=Category.MODELS,
-            summary="OpenAI released GPT-5, featuring improved reasoning and 2x context window. Benchmarks show 15% improvement on MMLU.",
+            summary=(
+                "OpenAI released GPT-5, featuring improved reasoning"
+                " and 2x context window. Benchmarks show 15% improvement on MMLU."
+            ),
             relevance_score=9.2,
             tags=["openai", "gpt-5", "llm"],
-            published_at=datetime(2025, 2, 10, 8, 0, tzinfo=timezone.utc),
+            published_at=datetime(2025, 2, 10, 8, 0, tzinfo=UTC),
         ),
         BriefingItem(
             id="arxiv-2502.12345",
@@ -117,7 +120,7 @@ def sample_briefing(sample_briefing_items) -> DailyBriefing:
     """A complete daily briefing for integration tests."""
     return DailyBriefing(
         date="2025-02-10",
-        generated_at=datetime(2025, 2, 10, 14, 15, 0, tzinfo=timezone.utc),
+        generated_at=datetime(2025, 2, 10, 14, 15, 0, tzinfo=UTC),
         headline="OpenAI releases GPT-5 with improved reasoning",
         stats=BriefingStats(
             total_items=3,
@@ -151,12 +154,15 @@ MOCK_HN_NON_AI_STORY = {
     "time": 1707552000,
 }
 
-MOCK_ARXIV_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?>
+MOCK_ARXIV_RESPONSE = """\
+<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <entry>
     <id>http://arxiv.org/abs/2502.12345</id>
-    <title>A Novel Approach to Transformer Attention Mechanisms</title>
-    <summary>We propose a new attention mechanism that reduces computational complexity from quadratic to linear.</summary>
+    <title>A Novel Approach to Transformer Attention</title>
+    <summary>We propose a new attention mechanism
+    that reduces complexity from quadratic to linear.
+    </summary>
     <author><name>Alice Smith</name></author>
     <author><name>Bob Jones</name></author>
     <published>2025-02-10T06:00:00Z</published>
