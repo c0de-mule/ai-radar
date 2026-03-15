@@ -110,7 +110,7 @@ class Settings:
     )
     dashboard_url: str = field(
         default_factory=lambda: os.environ.get(
-            "DASHBOARD_URL", "https://everettcento.github.io/ai-radar/"
+            "DASHBOARD_URL", "https://c0de-mule.github.io/ai-radar/"
         )
     )
 

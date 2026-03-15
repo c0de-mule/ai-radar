@@ -2,7 +2,7 @@
 name = "ai-radar"
 version = "0.1.0"
 description = "Auto-curated AI intelligence dashboard — daily briefings from top AI sources"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
     "google-genai>=1.0.0",
     "anthropic>=0.40.0",

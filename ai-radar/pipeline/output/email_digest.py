@@ -6,6 +6,7 @@ and sends it via the Resend API.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from pathlib import Path
 
@@ -77,14 +78,19 @@ async def send_digest(briefing: DailyBriefing, settings: Settings) -> bool:
         import resend
 
         resend.api_key = settings.resend_api_key
-        resend.Emails.send(
-            {
-                "from": EMAIL_FROM,
-                "to": settings.email_recipients,
-                "subject": f"🛰️ AI Radar — {briefing.headline}",
-                "html": html,
-            }
-        )
+
+        # Run sync Resend client in a thread to avoid blocking the event loop
+        def _send_email() -> None:
+            resend.Emails.send(
+                {
+                    "from": EMAIL_FROM,
+                    "to": settings.email_recipients,
+                    "subject": f"🛰️ AI Radar — {briefing.headline}",
+                    "html": html,
+                }
+            )
+
+        await asyncio.to_thread(_send_email)
         logger.info("Sent digest email to %d recipients", len(settings.email_recipients))
         return True
     except Exception as exc:

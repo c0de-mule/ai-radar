@@ -2,15 +2,17 @@
 
 Uses the official HN Firebase API (no auth required) to fetch top stories,
 then filters for AI-related content using keyword matching.
+Fetches story details concurrently within batches.
 
 API docs: https://github.com/HackerNews/API
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import re
 from datetime import datetime, timezone
-from typing import Optional
 
 import httpx
 
@@ -20,16 +22,16 @@ from pipeline.models import RawItem, Source
 logger = logging.getLogger(__name__)
 
 HN_BASE_URL = "https://hacker-news.firebaseio.com/v0"
-_BATCH_SIZE = 20  # Fetch story details in batches to be polite
+_BATCH_SIZE = 20  # Concurrent requests per batch to be polite to the API
 
 
 def _matches_ai_keywords(text: str) -> bool:
-    """Check if text contains any AI-related keywords (case-insensitive)."""
+    """Check if text contains any AI-related keywords using word boundaries."""
     lower = text.lower()
-    return any(kw in lower for kw in AI_KEYWORDS)
+    return any(re.search(rf"\b{re.escape(kw)}\b", lower) for kw in AI_KEYWORDS)
 
 
-async def _fetch_story(client: httpx.AsyncClient, story_id: int) -> Optional[dict]:
+async def _fetch_story(client: httpx.AsyncClient, story_id: int) -> dict | None:
     """Fetch a single story's details from the HN API.
 
     Returns None if the request fails or the item is not a story.
@@ -48,6 +50,9 @@ async def _fetch_story(client: httpx.AsyncClient, story_id: int) -> Optional[dic
 async def fetch_hackernews() -> list[RawItem]:
     """Fetch AI-related top stories from Hacker News.
 
+    Fetches story details concurrently in batches of _BATCH_SIZE
+    to balance speed with API politeness.
+
     Returns:
         List of RawItem objects for stories matching AI keywords
         with score >= HN_MIN_SCORE.
@@ -64,17 +69,22 @@ async def fetch_hackernews() -> list[RawItem]:
             logger.error("Failed to fetch HN top stories: %s", exc)
             return items
 
-        # 2. Fetch story details in batches
+        # 2. Fetch story details concurrently in batches
         for batch_start in range(0, len(story_ids), _BATCH_SIZE):
             batch = story_ids[batch_start : batch_start + _BATCH_SIZE]
-            stories = []
-            for sid in batch:
-                story = await _fetch_story(client, sid)
-                if story:
-                    stories.append(story)
+
+            # Fetch all stories in the batch concurrently
+            results = await asyncio.gather(
+                *[_fetch_story(client, sid) for sid in batch],
+                return_exceptions=True,
+            )
 
             # 3. Filter by AI keywords and minimum score
-            for story in stories:
+            for result in results:
+                if isinstance(result, Exception) or result is None:
+                    continue
+
+                story = result
                 title = story.get("title", "")
                 url = story.get("url", f"https://news.ycombinator.com/item?id={story['id']}")
                 score = story.get("score", 0)

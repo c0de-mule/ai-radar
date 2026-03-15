@@ -10,6 +10,7 @@ Uses a fallback chain: Gemini → Claude → extractive fallback.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from typing import Any
@@ -54,16 +55,22 @@ async def _summarize_with_gemini(
         from google import genai
 
         client = genai.Client(api_key=settings.gemini_api_key)
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=_build_user_prompt(items),
-            config=genai.types.GenerateContentConfig(
-                system_instruction=_SYSTEM_PROMPT,
-                temperature=0.3,
-                response_mime_type="application/json",
-            ),
-        )
-        text = response.text.strip()
+
+        # Run sync Gemini client in a thread to avoid blocking the event loop
+        def _call_gemini() -> str:
+            resp = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=_build_user_prompt(items),
+                config=genai.types.GenerateContentConfig(
+                    system_instruction=_SYSTEM_PROMPT,
+                    temperature=0.3,
+                    response_mime_type="application/json",
+                ),
+            )
+            return resp.text
+
+        response_text = await asyncio.to_thread(_call_gemini)
+        text = response_text.strip()
         # Handle potential markdown code fences
         if text.startswith("```"):
             text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
@@ -89,13 +96,19 @@ async def _summarize_with_claude(
         import anthropic
 
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=4096,
-            system=_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": _build_user_prompt(items)}],
-        )
-        text = response.content[0].text.strip()
+
+        # Run sync Anthropic client in a thread to avoid blocking the event loop
+        def _call_claude() -> str:
+            resp = client.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=4096,
+                system=_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": _build_user_prompt(items)}],
+            )
+            return resp.content[0].text
+
+        response_text = await asyncio.to_thread(_call_claude)
+        text = response_text.strip()
         if text.startswith("```"):
             text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
         results = json.loads(text)
