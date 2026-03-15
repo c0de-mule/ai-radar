@@ -5,7 +5,6 @@ from pydantic import ValidationError
 
 from pipeline.models import (
     BriefingItem,
-    BriefingStats,
     Category,
     DailyBriefing,
     RawItem,
@@ -17,7 +16,10 @@ class TestRawItem:
     """Tests for the RawItem model."""
 
     def test_create_minimal(self):
-        item = RawItem(id="test-1", title="Test", url="https://example.com", source=Source.HACKERNEWS)
+        item = RawItem(
+            id="test-1", title="Test", url="https://example.com",
+            source=Source.HACKERNEWS,
+        )
         assert item.id == "test-1"
         assert item.content == ""
         assert item.relevance_score == 0.0

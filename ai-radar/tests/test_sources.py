@@ -16,7 +16,6 @@ from tests.conftest import (
     MOCK_HN_NON_AI_STORY,
     MOCK_HN_STORY,
     MOCK_HN_TOP_STORIES,
-    MOCK_RSS_RESPONSE,
 )
 
 

@@ -7,12 +7,12 @@ Defines the core types that flow through every stage:
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class Source(str, Enum):
+class Source(StrEnum):
     """Origin of a fetched item."""
 
     HACKERNEWS = "hackernews"
@@ -20,7 +20,7 @@ class Source(str, Enum):
     RSS = "rss"
 
 
-class Category(str, Enum):
+class Category(StrEnum):
     """Content category for a briefing item."""
 
     MODELS = "models"

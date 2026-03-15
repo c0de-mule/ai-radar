@@ -93,7 +93,10 @@ async def fetch_arxiv() -> list[RawItem]:
                 title=title,
                 url=link,
                 source=Source.ARXIV,
-                source_detail=f"arXiv ({', '.join(authors[:2])}{'...' if len(authors) > 2 else ''})",
+                source_detail=(
+                    f"arXiv ({', '.join(authors[:2])}"
+                    f"{'...' if len(authors) > 2 else ''})"
+                ),
                 content=abstract,
                 authors=authors,
                 published_at=published,

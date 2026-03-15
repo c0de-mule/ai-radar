@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from pipeline.output.email_digest import _render_digest_html
 from pipeline.output.json_writer import _update_index, write_briefing
 

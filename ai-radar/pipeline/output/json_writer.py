@@ -28,7 +28,7 @@ def _update_index(data_dir: Path, date_str: str) -> None:
     if index_path.exists():
         try:
             index_data = json.loads(index_path.read_text())
-        except (json.JSONDecodeError, IOError):
+        except (json.JSONDecodeError, OSError):
             index_data = {"dates": [], "total_briefings": 0}
     else:
         index_data = {"dates": [], "total_briefings": 0}

@@ -2,8 +2,6 @@
 
 from datetime import UTC, datetime
 
-import pytest
-
 from pipeline.models import Category, RawItem, Source
 from pipeline.processing.ai_summarizer import (
     _build_user_prompt,
