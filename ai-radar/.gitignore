@@ -22,6 +22,13 @@ env/
 .env
 .env.local
 
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
 # Pipeline output
 data/
 

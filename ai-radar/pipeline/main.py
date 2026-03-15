@@ -66,7 +66,7 @@ async def fetch_all_sources() -> list[RawItem]:
     all_items: list[RawItem] = []
     source_names = ["Hacker News", "arXiv", "RSS"]
 
-    for name, result in zip(source_names, results, strict=False):
+    for name, result in zip(source_names, results, strict=True):
         if isinstance(result, Exception):
             logger.error("Failed to fetch from %s: %s", name, result)
         else:

@@ -52,7 +52,7 @@ AI Radar is a Python pipeline that aggregates AI news from Hacker News, arXiv, a
 - **Daily briefing dashboard** — Dark-themed web UI with category filtering, search, date navigation, and skeleton loading states
 - **Email digest** — Jinja2-templated HTML emails sent via Resend, grouped by category
 - **Automated via GitHub Actions** — Daily cron job generates briefings, commits data, and deploys dashboard via GitHub Pages
-- **44 tests** — Comprehensive test suite with `pytest`, `pytest-asyncio`, and `respx` HTTP mocking
+- **58 tests** — Comprehensive test suite with `pytest`, `pytest-asyncio`, and `respx` HTTP mocking
 
 ## Tech Stack
 
